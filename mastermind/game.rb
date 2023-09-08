@@ -1,7 +1,6 @@
 require 'colorize'
-
 class Mastermind
-  COLORS = %w[red blue green yellow]
+ COLORS = %w[red blue green yellow]
   MAX_TURNS = 12
 
   def initialize
@@ -42,24 +41,6 @@ class Mastermind
     (1..MAX_TURNS).each do |turn|
       puts "\nTurno #{turn}"
       display_board
-      guess = get_player_guess
-      feedback = give_feedback(guess)
-      @attempts << { guess: guess, feedback: feedback }
-      if guess == @code
-        puts '¡Felicidades! Has adivinado el código secreto.'
-        break
-      elsif turn == MAX_TURNS
-        puts 'Juego terminado. Agotaste tus intentos.'
-        break
-      end
-    end
-    play_again
-  end
-
-  def computer_guess
-    (1..MAX_TURNS).each do |turn|
-      puts "\nTurno #{turn}"
-      display_board
       guess = generate_random_guess
       feedback = give_feedback(guess)
       @attempts << { guess: guess, feedback: feedback }
@@ -74,11 +55,39 @@ class Mastermind
     play_again
   end
 
+
+    
+
+  def computer_guess
+  (1..MAX_TURNS).each do |turn|
+    guess = get_player_guess
+    
+    feedback = give_feedback(guess)
+    @attempts << { guess: guess, feedback: feedback }
+
+    puts "\nTurno #{turn}"
+    display_board 
+    if guess == @code
+      puts '¡Felicidades! Has adivinado el código secreto.'
+      puts "La combinacion ganadora era: #{@code.join(', ')}"
+      break
+    elsif turn == MAX_TURNS
+      puts 'Juego terminado. Agotaste tus intentos.'
+      puts "La combinacion ganadora era: #{@code.join(', ')}"
+      break
+    end
+  end
+  play_again
+end
+
+
+
   def display_board
-    puts '------------------------'
-    puts '| Intento |  Código   |'
-    puts '------------------------'
-    @attempts.each_with_index do |attempt, index|
+    
+    @attempts.each_with_index do |attempt, index=1|
+      puts '------------------------'
+      puts '| Intento |  Código   |'
+      puts '------------------------'
       print "|    #{index + 1}    | "
       print_colors(attempt[:guess])
       print '  | '
@@ -96,11 +105,11 @@ class Mastermind
     feedback.each do |fb|
       case fb
       when 'correct_color'
-        print '⬤ '.colorize(:green)
-      when 'correct_position'
-        print '⬤ '.colorize(:orange)
-      else
         print '⬤ '.colorize(:white)
+      when 'correct_position'
+        print '⬤ '.colorize(:green)
+      else
+        print '⬤ '.colorize(:red)
       end
     end
   end
@@ -119,7 +128,7 @@ class Mastermind
   def give_feedback(guess)
     feedback = []
     code_copy = @code.dup
-    guess.each_with_index do |color, index|
+    guess.each_with_index do |color, index=1|
       if color == code_copy[index]
         feedback << 'correct_position'
         code_copy[index] = nil
