@@ -39,11 +39,11 @@ class Mastermind
 
   def player_guess
     (1..MAX_TURNS).each do |turn|
-      puts "\nTurno #{turn}"
-      display_board
       guess = generate_random_guess
       feedback = give_feedback(guess)
       @attempts << { guess: guess, feedback: feedback }
+      puts "\nTurno #{turn}"
+      display_board
       if guess == @code
         puts '¡La computadora ha adivinado el código secreto!'
         break
@@ -61,10 +61,8 @@ class Mastermind
   def computer_guess
   (1..MAX_TURNS).each do |turn|
     guess = get_player_guess
-    
     feedback = give_feedback(guess)
     @attempts << { guess: guess, feedback: feedback }
-
     puts "\nTurno #{turn}"
     display_board 
     if guess == @code
