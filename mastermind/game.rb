@@ -1,18 +1,20 @@
 require 'colorize'
-class Mastermind
- COLORS = %w[red blue green yellow]
+class Game
+  COLORS = %w[red blue green yellow]
   MAX_TURNS = 12
 
   def initialize
-    @code = generate_code
+    @code = generate_sequence
     @attempts = []
   end
 
+  # Metodos del Juego
+
   def play
-    puts 'Bienvenido a Mastermind!'
+    puts '!!--Mastermind--!!'
+    puts '!! Probemos tu ingenio !!'
     puts '¿Deseas ser el creador del código (C) o el adivinador (A)?'
     choice = gets.chomp.downcase
-
     if choice == 'c'
       create_code
     elsif choice == 'a'
@@ -21,6 +23,24 @@ class Mastermind
       puts 'Opción no válida. Debes elegir C o A.'
       play
     end
+  end
+
+  def play_again
+    puts '¿Deseas jugar de nuevo? (S/N)'
+    choice = gets.chomp.downcase
+    if choice == 's'
+      Game.new.play
+    elsif choice == 'n'
+      puts '¡Gracias por jugar!'
+      exit
+    else
+      puts 'Opción no válida. Debes elegir S o N.'
+      play_again
+    end
+  end
+
+  def valid_code?(input)
+    input.length == 4 && input.all? { |color| COLORS.include?(color) }
   end
 
   private
@@ -32,14 +52,42 @@ class Mastermind
       @code = input
       player_guess
     else
-      puts 'Código no válido. Debe contener cuatro colores de la lista: red, blue, green, yellow.'
+      puts 'Secuencia inválida. Se debe ingresar cuatro colores de la lista escritos de forma correcta: red, blue, green, yellow.'
       create_code
     end
   end
 
+    # Metodos del funcionamiento de la Computadora
+
+  def generate_sequence
+    COLORS.sample(4)
+  end
+
+  def computer_guess
+    (1..MAX_TURNS).each do |turn|
+      guess = get_player_guess
+      feedback = give_feedback(guess)
+      @attempts << { guess: guess, feedback: feedback }
+      puts "\nTurno #{turn}"
+      display_board 
+      if guess == @code
+        puts '¡Felicidades! Has adivinado el código secreto.'
+        puts "La combinacion ganadora era: #{@code.join(', ')}"
+        break
+      elsif turn == MAX_TURNS
+        puts 'Juego terminado. Agotaste tus intentos.'
+        puts "La combinacion ganadora era: #{@code.join(', ')}"
+        break
+      end
+    end
+    play_again
+  end
+
+  #Metodos del Jugador
+
   def player_guess
     (1..MAX_TURNS).each do |turn|
-      guess = generate_random_guess
+      guess = generate_sequence
       feedback = give_feedback(guess)
       @attempts << { guess: guess, feedback: feedback }
       puts "\nTurno #{turn}"
@@ -55,44 +103,31 @@ class Mastermind
     play_again
   end
 
-
-    
-
-  def computer_guess
-  (1..MAX_TURNS).each do |turn|
-    guess = get_player_guess
-    feedback = give_feedback(guess)
-    @attempts << { guess: guess, feedback: feedback }
-    puts "\nTurno #{turn}"
-    display_board 
-    if guess == @code
-      puts '¡Felicidades! Has adivinado el código secreto.'
-      puts "La combinacion ganadora era: #{@code.join(', ')}"
-      break
-    elsif turn == MAX_TURNS
-      puts 'Juego terminado. Agotaste tus intentos.'
-      puts "La combinacion ganadora era: #{@code.join(', ')}"
-      break
+  def get_player_guess
+    puts 'Adivina la combinación de colores (ejemplo: red blue green yellow):'
+    input = gets.chomp.split
+    if valid_code?(input)
+      input
+    else
+      puts 'Secuencia inválida. Se debe ingresar cuatro colores de la lista escritos de forma correcta: red, blue, green, yellow.'
+      get_player_guess
     end
   end
-  play_again
-end
 
-
+  #Metodos del Tablero
 
   def display_board
-    
     @attempts.each_with_index do |attempt, index=1|
-      puts '------------------------'
-      puts '| Intento |  Código   |'
-      puts '------------------------'
-      print "|    #{index + 1}    | "
+      puts '-----------------------------------'
+      puts '| # Intento |  Colores  |  Guía  |'
+      puts '-----------------------------------'
+      print "|     #{index + 1}     |  "
       print_colors(attempt[:guess])
-      print '  | '
+      print ' | '
       print_feedback(attempt[:feedback])
-      puts ' |'
+      puts '|'
     end
-    puts '------------------------'
+    puts '-----------------------------------'
   end
 
   def print_colors(colors)
@@ -112,17 +147,6 @@ end
     end
   end
 
-  def get_player_guess
-    puts 'Ingresa tu adivinanza (ejemplo: red blue green yellow):'
-    input = gets.chomp.split
-    if valid_code?(input)
-      input
-    else
-      puts 'Adivinanza no válida. Debe contener cuatro colores de la lista: red, blue, green, yellow.'
-      get_player_guess
-    end
-  end
-
   def give_feedback(guess)
     feedback = []
     code_copy = @code.dup
@@ -139,32 +163,9 @@ end
     feedback
   end
 
-  def valid_code?(input)
-    input.length == 4 && input.all? { |color| COLORS.include?(color) }
-  end
-
-  def generate_code
-    COLORS.sample(4)
-  end
-
-  def generate_random_guess
-    COLORS.sample(4)
-  end
-
-  def play_again
-    puts '¿Deseas jugar de nuevo? (S/N)'
-    choice = gets.chomp.downcase
-    if choice == 's'
-      Mastermind.new.play
-    elsif choice == 'n'
-      puts '¡Gracias por jugar!'
-      exit
-    else
-      puts 'Opción no válida. Debes elegir S o N.'
-      play_again
-    end
-  end
 end
 
-game = Mastermind.new
+#Se genera un nuevo objeto de la clase para ejecutar la cadena de metodos 
+
+game = Game.new
 game.play
